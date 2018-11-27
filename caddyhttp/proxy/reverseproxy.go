@@ -252,9 +252,12 @@ func NewSingleHostReverseProxy(target *url.URL, without string, keepalive int, t
 	} else if target.Scheme == "quic" {
 		rp.Transport = &h2quic.RoundTripper{
 			QuicConfig: &quic.Config{
-				HandshakeTimeout: defaultCryptoHandshakeTimeout,
+				HandshakeTimeout: defaultCryptoHandshakeTimeout ,
+				IdleTimeout: timeout,
 				KeepAlive:        true,
 			},
+			MaxConn: keepalive,
+			Timeout: timeout,
 		}
 	} else if keepalive != http.DefaultMaxIdleConnsPerHost || strings.HasPrefix(target.Scheme, "srv") {
 		dialFunc := rp.dialer.Dial

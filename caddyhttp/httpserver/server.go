@@ -37,6 +37,7 @@ import (
 	"github.com/mholt/caddy/caddyhttp/staticfiles"
 	"github.com/mholt/caddy/caddytls"
 	"github.com/mholt/caddy/telemetry"
+	"github.com/lucas-clemente/quic-go"
 )
 
 // Server is the HTTP server implementation.
@@ -107,7 +108,9 @@ func NewServer(addr string, group []*SiteConfig) (*Server, error) {
 	if s.Server.TLSConfig != nil {
 		// enable QUIC if desired (requires HTTP/2)
 		if HTTP2 && QUIC {
-			s.quicServer = &h2quic.Server{Server: s.Server}
+			s.quicServer = &h2quic.Server{Server: s.Server, QuicConfig: &quic.Config{
+				IdleTimeout: s.Server.IdleTimeout,
+			}}
 			s.Server.Handler = s.wrapWithSvcHeaders(s.Server.Handler)
 		}
 
